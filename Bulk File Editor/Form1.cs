@@ -17,7 +17,7 @@ namespace Bulk_File_Editor
         private FolderBrowserDialog openFileDialog;
         private VlcControl mediaPlayer;
         private PictureBox pictureBox;
-        private string[]    imgExt = { ".png", ".jpg", ".jpeg", ".webp", ".bmp" },
+        private string[] imgExt = { ".png", ".jpg", ".jpeg", ".webp", ".bmp" },
                             vidExt = { ".mp4", ".mov", ".webm", ".gif" };
 
         public MainForm()
@@ -50,7 +50,7 @@ namespace Bulk_File_Editor
                 file.Dispose();
                 File.Move(mediaPath, newPath, false);
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
                 Console.WriteLine(ex);
                 return;
@@ -80,6 +80,9 @@ namespace Bulk_File_Editor
                 mediaFiles = new List<string>();
 
                 Console.WriteLine(Directory.GetFiles(openFileDialog.SelectedPath).Length + " Files in the Folder");
+                LoadDisplay.Maximum = Directory.GetFiles(openFileDialog.SelectedPath).Length;
+                LoadDisplay.Minimum = 0;
+                LoadDisplay.Value = 0;
                 int i = 1;
                 foreach (string f in Directory.GetFiles(openFileDialog.SelectedPath))
                 {
@@ -102,9 +105,12 @@ namespace Bulk_File_Editor
                         Console.WriteLine("Added img\n" + "File number " + i + " checked " + f);
                     }
 
-                    i++;
-                };
+                    LoadDisplay.Value = i;
 
+                    i++;
+                }
+
+                LoadDisplay.Value = 0;
 
                 /*
                  * 
@@ -119,6 +125,12 @@ namespace Bulk_File_Editor
 
         private void loadMedia()
         {
+            if (mediaFiles.Count == 0)
+            {
+                MessageBox.Show("No files found!");
+                return;
+            }
+
             string mediaPath = mediaFiles[0];
 
             Console.WriteLine(mediaPath);
@@ -136,11 +148,12 @@ namespace Bulk_File_Editor
                     {
                         ImageLocation = mediaPath,
                         Bounds = new System.Drawing.Rectangle(5, 5, 400, 150),
-                        SizeMode = PictureBoxSizeMode.CenterImage,
-                        BorderStyle = BorderStyle.FixedSingle
+                        SizeMode = PictureBoxSizeMode.Zoom,
+                        BorderStyle = BorderStyle.FixedSingle,
+                        Dock = DockStyle.Fill
                     };
 
-                    this.Controls.Add(pictureBox);
+                    MediaHolder.Controls.Add(pictureBox);
                 }
                 else if (RadioV.Checked)
                 {
@@ -155,7 +168,6 @@ namespace Bulk_File_Editor
                         mediaPlayer = new VlcControl();
                         mediaPlayer.BeginInit();
                         mediaPlayer.VlcLibDirectory = new DirectoryInfo("C:\\Program Files\\VideoLAN\\VLC");
-                        mediaPlayer.VlcMediaplayerOptions = new[] { "--config=\"C:\\Users\\3rike\\AppData\\Roaming\\vlc\\vlcrc\"", "-vv" };
                         mediaPlayer.EndInit();
 
                         MediaHolder.Controls.Add(mediaPlayer);
@@ -184,6 +196,22 @@ namespace Bulk_File_Editor
             {
                 MessageBox.Show(ex.Message);
             }
+        }
+
+        private void StopButton_Click(object sender, EventArgs e)
+        {
+            if (!mediaPlayerOpen) return;
+
+            mediaPlayer.VlcMediaPlayer.Stop();
+        }
+
+        private void ReplayButton_Click(object sender, EventArgs e)
+        {
+            if (!mediaPlayerOpen) return;
+
+            if (mediaPlayer.VlcMediaPlayer.IsPlaying())
+                mediaPlayer.VlcMediaPlayer.Stop();
+            mediaPlayer.VlcMediaPlayer.Play();
         }
     }
 }

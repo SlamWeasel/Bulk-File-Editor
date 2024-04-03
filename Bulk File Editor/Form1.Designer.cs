@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            button1 = new Button();
+            NextButton = new Button();
             panel1 = new Panel();
             CommentField = new TextBox();
             label2 = new Label();
@@ -38,20 +38,23 @@
             MediaHolder = new Panel();
             RadioV = new RadioButton();
             RadioI = new RadioButton();
+            LoadDisplay = new ProgressBar();
+            StopButton = new Button();
+            ReplayButton = new Button();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
-            // button1
+            // NextButton
             // 
-            button1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            button1.Font = new Font("Wingdings", 36F, FontStyle.Regular, GraphicsUnit.Point, 2);
-            button1.Location = new Point(12, 379);
-            button1.Name = "button1";
-            button1.Size = new Size(67, 59);
-            button1.TabIndex = 0;
-            button1.Text = "Ø";
-            button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click;
+            NextButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            NextButton.Font = new Font("Wingdings", 36F, FontStyle.Regular, GraphicsUnit.Point, 2);
+            NextButton.Location = new Point(12, 379);
+            NextButton.Name = "NextButton";
+            NextButton.Size = new Size(67, 59);
+            NextButton.TabIndex = 0;
+            NextButton.Text = "Ø";
+            NextButton.UseVisualStyleBackColor = true;
+            NextButton.Click += button1_Click;
             // 
             // panel1
             // 
@@ -127,7 +130,7 @@
             RadioV.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             RadioV.AutoSize = true;
             RadioV.Checked = true;
-            RadioV.Location = new Point(167, 411);
+            RadioV.Location = new Point(382, 419);
             RadioV.Name = "RadioV";
             RadioV.Size = new Size(60, 19);
             RadioV.TabIndex = 4;
@@ -139,12 +142,44 @@
             // 
             RadioI.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             RadioI.AutoSize = true;
-            RadioI.Location = new Point(267, 411);
+            RadioI.Location = new Point(482, 419);
             RadioI.Name = "RadioI";
             RadioI.Size = new Size(63, 19);
             RadioI.TabIndex = 5;
             RadioI.Text = "Images";
             RadioI.UseVisualStyleBackColor = true;
+            // 
+            // LoadDisplay
+            // 
+            LoadDisplay.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            LoadDisplay.Location = new Point(193, 379);
+            LoadDisplay.Name = "LoadDisplay";
+            LoadDisplay.Size = new Size(353, 23);
+            LoadDisplay.TabIndex = 6;
+            // 
+            // StopButton
+            // 
+            StopButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            StopButton.Font = new Font("Wingdings", 26.25F, FontStyle.Regular, GraphicsUnit.Point, 2);
+            StopButton.Location = new Point(85, 379);
+            StopButton.Name = "StopButton";
+            StopButton.Size = new Size(43, 42);
+            StopButton.TabIndex = 7;
+            StopButton.Text = "n";
+            StopButton.UseVisualStyleBackColor = true;
+            StopButton.Click += StopButton_Click;
+            // 
+            // ReplayButton
+            // 
+            ReplayButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            ReplayButton.Font = new Font("Wingdings 3", 24F, FontStyle.Regular, GraphicsUnit.Point, 2);
+            ReplayButton.Location = new Point(134, 379);
+            ReplayButton.Name = "ReplayButton";
+            ReplayButton.Size = new Size(43, 42);
+            ReplayButton.TabIndex = 8;
+            ReplayButton.Text = "P";
+            ReplayButton.UseVisualStyleBackColor = true;
+            ReplayButton.Click += ReplayButton_Click;
             // 
             // MainForm
             // 
@@ -152,11 +187,14 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(ReplayButton);
+            Controls.Add(StopButton);
+            Controls.Add(LoadDisplay);
             Controls.Add(RadioI);
             Controls.Add(RadioV);
             Controls.Add(MediaPlaceholder);
             Controls.Add(panel1);
-            Controls.Add(button1);
+            Controls.Add(NextButton);
             Controls.Add(MediaHolder);
             Name = "MainForm";
             Text = "File Scrubber";
@@ -169,7 +207,7 @@
 
         #endregion
 
-        private Button button1;
+        private Button NextButton;
         private Panel panel1;
         private TextBox NameField;
         private Label label1;
@@ -179,5 +217,8 @@
         private Panel MediaHolder;
         private RadioButton RadioV;
         private RadioButton RadioI;
+        private ProgressBar LoadDisplay;
+        private Button StopButton;
+        private Button ReplayButton;
     }
 }
