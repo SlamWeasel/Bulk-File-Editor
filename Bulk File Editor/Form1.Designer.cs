@@ -28,6 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             NextButton = new Button();
             panel1 = new Panel();
             CommentField = new TextBox();
@@ -41,6 +43,13 @@
             LoadDisplay = new ProgressBar();
             StopButton = new Button();
             ReplayButton = new Button();
+            SkipButton = new Button();
+            TipStop = new ToolTip(components);
+            TipReload = new ToolTip(components);
+            TipApply = new ToolTip(components);
+            TipSkip = new ToolTip(components);
+            OpenButton = new Button();
+            TipOpen = new ToolTip(components);
             panel1.SuspendLayout();
             SuspendLayout();
             // 
@@ -48,7 +57,7 @@
             // 
             NextButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             NextButton.Font = new Font("Wingdings", 36F, FontStyle.Regular, GraphicsUnit.Point, 2);
-            NextButton.Location = new Point(12, 379);
+            NextButton.Location = new Point(12, 375);
             NextButton.Name = "NextButton";
             NextButton.Size = new Size(67, 59);
             NextButton.TabIndex = 0;
@@ -66,7 +75,7 @@
             panel1.Controls.Add(label1);
             panel1.Location = new Point(563, 12);
             panel1.Name = "panel1";
-            panel1.Size = new Size(225, 426);
+            panel1.Size = new Size(225, 452);
             panel1.TabIndex = 1;
             // 
             // CommentField
@@ -76,6 +85,7 @@
             CommentField.Name = "CommentField";
             CommentField.Size = new Size(217, 23);
             CommentField.TabIndex = 3;
+            CommentField.KeyPress += CommentField_KeyPress;
             // 
             // label2
             // 
@@ -93,6 +103,7 @@
             NameField.Name = "NameField";
             NameField.Size = new Size(217, 23);
             NameField.TabIndex = 1;
+            NameField.KeyPress += CommentField_KeyPress;
             // 
             // label1
             // 
@@ -110,7 +121,7 @@
             MediaPlaceholder.Font = new Font("Segoe UI Semibold", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
             MediaPlaceholder.Location = new Point(193, 145);
             MediaPlaceholder.Name = "MediaPlaceholder";
-            MediaPlaceholder.Size = new Size(210, 71);
+            MediaPlaceholder.Size = new Size(210, 97);
             MediaPlaceholder.TabIndex = 2;
             MediaPlaceholder.Text = "No Media Folder Selected";
             MediaPlaceholder.TextAlign = ContentAlignment.MiddleCenter;
@@ -122,7 +133,7 @@
             MediaHolder.BorderStyle = BorderStyle.FixedSingle;
             MediaHolder.Location = new Point(12, 12);
             MediaHolder.Name = "MediaHolder";
-            MediaHolder.Size = new Size(534, 361);
+            MediaHolder.Size = new Size(534, 357);
             MediaHolder.TabIndex = 3;
             // 
             // RadioV
@@ -130,7 +141,7 @@
             RadioV.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             RadioV.AutoSize = true;
             RadioV.Checked = true;
-            RadioV.Location = new Point(382, 419);
+            RadioV.Location = new Point(193, 415);
             RadioV.Name = "RadioV";
             RadioV.Size = new Size(60, 19);
             RadioV.TabIndex = 4;
@@ -142,7 +153,7 @@
             // 
             RadioI.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             RadioI.AutoSize = true;
-            RadioI.Location = new Point(482, 419);
+            RadioI.Location = new Point(293, 415);
             RadioI.Name = "RadioI";
             RadioI.Size = new Size(63, 19);
             RadioI.TabIndex = 5;
@@ -152,7 +163,7 @@
             // LoadDisplay
             // 
             LoadDisplay.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            LoadDisplay.Location = new Point(193, 379);
+            LoadDisplay.Location = new Point(193, 375);
             LoadDisplay.Name = "LoadDisplay";
             LoadDisplay.Size = new Size(353, 23);
             LoadDisplay.TabIndex = 6;
@@ -161,7 +172,7 @@
             // 
             StopButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             StopButton.Font = new Font("Wingdings", 26.25F, FontStyle.Regular, GraphicsUnit.Point, 2);
-            StopButton.Location = new Point(85, 379);
+            StopButton.Location = new Point(85, 375);
             StopButton.Name = "StopButton";
             StopButton.Size = new Size(43, 42);
             StopButton.TabIndex = 7;
@@ -173,7 +184,7 @@
             // 
             ReplayButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             ReplayButton.Font = new Font("Wingdings 3", 24F, FontStyle.Regular, GraphicsUnit.Point, 2);
-            ReplayButton.Location = new Point(134, 379);
+            ReplayButton.Location = new Point(134, 375);
             ReplayButton.Name = "ReplayButton";
             ReplayButton.Size = new Size(43, 42);
             ReplayButton.TabIndex = 8;
@@ -181,12 +192,63 @@
             ReplayButton.UseVisualStyleBackColor = true;
             ReplayButton.Click += ReplayButton_Click;
             // 
+            // SkipButton
+            // 
+            SkipButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            SkipButton.Font = new Font("Wingdings 3", 26.25F, FontStyle.Regular, GraphicsUnit.Point, 2);
+            SkipButton.Location = new Point(85, 423);
+            SkipButton.Name = "SkipButton";
+            SkipButton.Size = new Size(43, 42);
+            SkipButton.TabIndex = 9;
+            SkipButton.Text = "A";
+            SkipButton.UseVisualStyleBackColor = true;
+            SkipButton.Click += SkipButton_Click;
+            // 
+            // TipStop
+            // 
+            TipStop.ToolTipIcon = ToolTipIcon.Info;
+            TipStop.ToolTipTitle = "Stop";
+            // 
+            // TipReload
+            // 
+            TipReload.ToolTipIcon = ToolTipIcon.Info;
+            TipReload.ToolTipTitle = "Restart";
+            // 
+            // TipApply
+            // 
+            TipApply.ToolTipIcon = ToolTipIcon.Warning;
+            TipApply.ToolTipTitle = "Apply";
+            // 
+            // TipSkip
+            // 
+            TipSkip.ToolTipIcon = ToolTipIcon.Warning;
+            TipSkip.ToolTipTitle = "Skip";
+            // 
+            // OpenButton
+            // 
+            OpenButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            OpenButton.Font = new Font("Wingdings", 20.25F, FontStyle.Regular, GraphicsUnit.Point, 2);
+            OpenButton.Location = new Point(134, 425);
+            OpenButton.Name = "OpenButton";
+            OpenButton.Size = new Size(43, 42);
+            OpenButton.TabIndex = 10;
+            OpenButton.Text = "1";
+            OpenButton.UseVisualStyleBackColor = true;
+            OpenButton.Click += OpenButton_Click;
+            // 
+            // TipOpen
+            // 
+            TipOpen.ToolTipIcon = ToolTipIcon.Warning;
+            TipOpen.ToolTipTitle = "Open";
+            // 
             // MainForm
             // 
             AllowDrop = true;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(800, 476);
+            Controls.Add(OpenButton);
+            Controls.Add(SkipButton);
             Controls.Add(ReplayButton);
             Controls.Add(StopButton);
             Controls.Add(LoadDisplay);
@@ -196,6 +258,7 @@
             Controls.Add(panel1);
             Controls.Add(NextButton);
             Controls.Add(MediaHolder);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "MainForm";
             Text = "File Scrubber";
             Load += Form1_Load;
@@ -220,5 +283,12 @@
         private ProgressBar LoadDisplay;
         private Button StopButton;
         private Button ReplayButton;
+        private Button SkipButton;
+        private ToolTip TipStop;
+        private ToolTip TipReload;
+        private ToolTip TipApply;
+        private ToolTip TipSkip;
+        private Button OpenButton;
+        private ToolTip TipOpen;
     }
 }
