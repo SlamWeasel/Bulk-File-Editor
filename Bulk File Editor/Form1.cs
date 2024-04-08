@@ -7,6 +7,7 @@ using Vlc.DotNet.Core.Interops.Signatures;
 using Vlc.DotNet.Forms;
 using Microsoft.WindowsAPICodePack.Shell;
 using Microsoft.WindowsAPICodePack.Shell.PropertySystem;
+using System.IO;
 
 namespace Bulk_File_Editor
 {
@@ -89,14 +90,21 @@ namespace Bulk_File_Editor
 
                     if (pictureBox != null)
                         pictureBox.Dispose();
-                    pictureBox = new PictureBox()
-                    {
-                        ImageLocation = mediaPath,
-                        Bounds = new System.Drawing.Rectangle(5, 5, 400, 150),
-                        SizeMode = PictureBoxSizeMode.Zoom,
-                        BorderStyle = BorderStyle.FixedSingle,
-                        Dock = DockStyle.Fill
-                    };
+
+                    pictureBox = mediaPath.EndsWith(".webp") ?
+                        new PictureBox()
+                        {
+                            Image = new Func<string, Image>((p) => { using (WebP webp = new WebP()) return webp.Load(p); })(mediaPath),
+                        }
+                        : new PictureBox()
+                        {
+                            ImageLocation = mediaPath,
+                        };
+
+                    pictureBox.Bounds = new System.Drawing.Rectangle(5, 5, 400, 150);
+                    pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
+                    pictureBox.BorderStyle = BorderStyle.FixedSingle;
+                    pictureBox.Dock = DockStyle.Fill;
 
                     MediaHolder.Controls.Add(pictureBox);
                 }
