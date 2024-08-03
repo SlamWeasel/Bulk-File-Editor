@@ -50,7 +50,10 @@
             TipSkip = new ToolTip(components);
             OpenButton = new Button();
             TipOpen = new ToolTip(components);
+            VolumeBar = new TrackBar();
+            TipVolumne = new ToolTip(components);
             panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)VolumeBar).BeginInit();
             SuspendLayout();
             // 
             // NextButton
@@ -241,12 +244,29 @@
             TipOpen.ToolTipIcon = ToolTipIcon.Warning;
             TipOpen.ToolTipTitle = "Open";
             // 
+            // VolumeBar
+            // 
+            VolumeBar.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            VolumeBar.Location = new Point(193, 440);
+            VolumeBar.Maximum = 50;
+            VolumeBar.Name = "VolumeBar";
+            VolumeBar.Size = new Size(353, 45);
+            VolumeBar.TabIndex = 11;
+            VolumeBar.Value = 50;
+            VolumeBar.Scroll += VolumeBar_Scroll;
+            // 
+            // TipVolumne
+            // 
+            TipVolumne.ToolTipIcon = ToolTipIcon.Info;
+            TipVolumne.ToolTipTitle = "Volume";
+            // 
             // MainForm
             // 
             AllowDrop = true;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 476);
+            Controls.Add(VolumeBar);
             Controls.Add(OpenButton);
             Controls.Add(SkipButton);
             Controls.Add(ReplayButton);
@@ -264,6 +284,7 @@
             Load += Form1_Load;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)VolumeBar).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -290,5 +311,7 @@
         private ToolTip TipSkip;
         private Button OpenButton;
         private ToolTip TipOpen;
+        private TrackBar VolumeBar;
+        private ToolTip TipVolumne;
     }
 }

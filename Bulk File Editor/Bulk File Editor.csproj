@@ -12,6 +12,7 @@
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
     <StartupObject>Bulk_File_Editor.Program</StartupObject>
     <ApplicationIcon>FileScrubber.ico</ApplicationIcon>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,6 +21,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.WindowsAPICodePack.Shell" Version="1.1.0" />
+    <PackageReference Include="Snap.Discord.GameSDK" Version="1.6.0" />
     <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.20" />
     <PackageReference Include="Vlc.DotNet.Forms" Version="3.1.0" />
 	  <Content Include="libwebp_x86.dll">

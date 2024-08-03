@@ -7,27 +7,61 @@ using Vlc.DotNet.Core.Interops.Signatures;
 using Vlc.DotNet.Forms;
 using Microsoft.WindowsAPICodePack.Shell;
 using Microsoft.WindowsAPICodePack.Shell.PropertySystem;
-using System.IO;
+using Snap.Discord.GameSDK.ABI;
+using System.Runtime.CompilerServices;
+using System.Text.Unicode;
+using Windows.ApplicationModel.UserActivities;
 
 namespace Bulk_File_Editor
 {
-    public partial class MainForm : Form
+    public unsafe partial class MainForm : Form
     {
         bool MediaOpened = false, mediaPlayerOpen = false;
         public string mediaFolder;
+        /// <summary>
+        /// List of paths from the files that the program will go through
+        /// </summary>
         public List<string> mediaFiles;
         private FolderBrowserDialog openFileDialog;
+        /// <summary>
+        /// Video Player Control
+        /// </summary>
         private VlcControl mediaPlayer;
+        /// <summary>
+        /// Image Display Control
+        /// </summary>
         private PictureBox pictureBox;
         private string[] imgExt = { ".png", ".jpg", ".jpeg", ".webp", ".bmp", ".gif" },
                             vidExt = { ".mp4", ".mov", ".webm" };
+        private IDiscordActivityManager* discordActivityManager;
+        private readonly long ProgramStart = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        private int progress = 1, progressGoal;
+
+        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+        private static unsafe void UpdateActivity(void* any, DiscordResult result)
+        {
+            Console.WriteLine($"UpdateActivity Result: {result}");
+        }
+
+        private void setActivity(string detail)
+        {
+            DiscordActivity activity1 = default;
+            DiscordGame.Set(activity1.state, 128, RadioI.Checked ? "Going through Images" : RadioV.Checked ? "Going through Videos" : "Going through Files");
+            DiscordGame.Set(activity1.details, 128, detail);
+            activity1.timestamps.start = this.ProgramStart;
+            DiscordGame.Set(activity1.assets.large_image, 128, "filescrubber-icon");
+            DiscordGame.Set(activity1.assets.large_text, 128, "Software by SlamWeasel");
+            DiscordGame.Set(activity1.assets.small_image, 128, "eye");
+            DiscordGame.Set(activity1.assets.small_text, 128, "https://github.com/SlamWeasel/Bulk-File-Editor");
+            discordActivityManager->update_activity(discordActivityManager, &activity1, null, &UpdateActivity);
+        }
 
         // Non-Nullable Error
-        #pragma warning disable CS8618
+#pragma warning disable CS8618
         /// <summary>
         /// Program Entry, Constructor
         /// </summary>
-        public MainForm()
+        public unsafe MainForm()
         {
             InitializeComponent();
 
@@ -37,6 +71,26 @@ namespace Bulk_File_Editor
             TipReload.SetToolTip(ReplayButton, "Replay the video (might need to be stopped first)");
             TipSkip.SetToolTip(SkipButton, "Skips the current file without doing any changes to it. It will come up in the next listing");
             TipOpen.SetToolTip(OpenButton, "Open another Folder, will reload the media list, might take some time");
+            TipVolumne.SetToolTip(VolumeBar, "Set the volume the video is playing");
+
+            DiscordCreateParams @params = default;
+            Methods.DiscordCreateParamsSetDefault(&@params);
+            @params.client_id = 1235644610655813632;
+            @params.flags = (uint)DiscordCreateFlags.Default;
+            IDiscordCore* core;
+            Methods.DiscordCreate(3, &@params, &core);
+
+            ThreadPool.QueueUserWorkItem(obj =>
+            {
+                IDiscordCore* d = (IDiscordCore*)(nint)obj!;
+                while (true)
+                {
+                    Thread.Sleep(100);
+                    d->run_callbacks(d);
+                }
+            }, (nint)core);
+
+            discordActivityManager = core->get_activity_manager(core);
         }
 
         /// <summary>
@@ -49,6 +103,11 @@ namespace Bulk_File_Editor
             AllocConsole();
 
             Console.Write("Bulk File Editor Active\nConsole will deliver debug and Error Data, DONT PANIC !\n\n\n");
+
+            /*
+             * Setting the Discord Activity
+             */
+            setActivity("No Folder selected yet");
 
             if (MediaOpened) { MediaPlaceholder.Dispose(); }
         }
@@ -80,6 +139,11 @@ namespace Bulk_File_Editor
                 Console.WriteLine(mediaPath);
 
                 /*
+                 * Setting the Discord Activity
+                 */
+                setActivity($"Progress: {progress}/{progressGoal}"); 
+
+                /*
                  * Creating the Imagebox for displaying images if it doesnt already exist
                  */
                 if (RadioI.Checked)
@@ -95,16 +159,17 @@ namespace Bulk_File_Editor
                         new PictureBox()
                         {
                             Image = new Func<string, Image>((p) => { using (WebP webp = new WebP()) return webp.Load(p); })(mediaPath),
+                            BackColor = Color.Gray,
                         }
                         : new PictureBox()
                         {
-                            ImageLocation = mediaPath,
+                            ImageLocation = mediaPath
                         };
 
                     pictureBox.Bounds = new System.Drawing.Rectangle(5, 5, 400, 150);
                     pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
-                    pictureBox.BorderStyle = BorderStyle.FixedSingle;
                     pictureBox.Dock = DockStyle.Fill;
+                    pictureBox.BorderStyle = BorderStyle.FixedSingle;
 
                     MediaHolder.Controls.Add(pictureBox);
                 }
@@ -147,7 +212,7 @@ namespace Bulk_File_Editor
                 else return;
 
                 FileInfo fileInfo = new FileInfo(mediaPath);
-                if(!MediaPlaceholder.IsDisposed) MediaPlaceholder.Dispose();
+                if (!MediaPlaceholder.IsDisposed) MediaPlaceholder.Dispose();
                 NameField.Text = fileInfo.Name.Substring(0, fileInfo.Name.Length - fileInfo.Extension.Length);
             }
             catch (Exception ex)
@@ -175,7 +240,7 @@ namespace Bulk_File_Editor
                 return;
             }
 
-            if ( mediaPlayer != null) mediaPlayer.VlcMediaPlayer.Stop();
+            if (mediaPlayer != null) mediaPlayer.VlcMediaPlayer.Stop();
 
             string mediaPath = mediaFiles[0];
             ShellFile file = ShellFile.FromFilePath(mediaPath);
@@ -229,9 +294,11 @@ namespace Bulk_File_Editor
 
             CommentField.Text = "";
 
+            progress++;
+
             loadMedia();
         }
-        
+
         /// <summary>
         /// Clicking on the label to load the first folder. Removed the label
         /// </summary>
@@ -286,6 +353,8 @@ namespace Bulk_File_Editor
                 }
 
                 LoadDisplay.Value = 0;
+
+                progressGoal = mediaFiles.Count();
 
                 /*
                  * 
@@ -345,6 +414,8 @@ namespace Bulk_File_Editor
 
             CommentField.Text = "";
 
+            progress++;
+
             loadMedia();
         }
 
@@ -355,8 +426,30 @@ namespace Bulk_File_Editor
         /// <param name="e"></param>
         private void OpenButton_Click(object sender, EventArgs e)
         {
-            if(!MediaPlaceholder.IsDisposed) return;
+            if (!MediaPlaceholder.IsDisposed) return;
             MediaPlaceholder_Click(sender, e);
         }
+
+        /// <summary>
+        /// Adjusting the Volumne of the mediaplayer
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void VolumeBar_Scroll(object sender, EventArgs e)
+        {
+            if (!mediaPlayerOpen) return;
+
+            mediaPlayer.VlcMediaPlayer.Audio.Volume = VolumeBar.Value * 2;
+        }
+    }
+}
+
+internal static class DiscordGame
+{
+    public static unsafe void Set(sbyte* reference, int length, string source)
+    {
+        Span<sbyte> sbytes = new(reference, length);
+        sbytes.Clear();
+        Utf8.FromUtf16(source.AsSpan(), MemoryMarshal.Cast<sbyte, byte>(sbytes), out _, out _);
     }
 }
