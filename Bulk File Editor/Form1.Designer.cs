@@ -52,6 +52,8 @@
             TipOpen = new ToolTip(components);
             VolumeBar = new TrackBar();
             TipVolumne = new ToolTip(components);
+            DeleteButton = new Button();
+            TipDelete = new ToolTip(components);
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)VolumeBar).BeginInit();
             SuspendLayout();
@@ -260,12 +262,31 @@
             TipVolumne.ToolTipIcon = ToolTipIcon.Info;
             TipVolumne.ToolTipTitle = "Volume";
             // 
+            // DeleteButton
+            // 
+            DeleteButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            DeleteButton.BackColor = Color.Salmon;
+            DeleteButton.FlatStyle = FlatStyle.Popup;
+            DeleteButton.Location = new Point(471, 411);
+            DeleteButton.Name = "DeleteButton";
+            DeleteButton.Size = new Size(75, 23);
+            DeleteButton.TabIndex = 12;
+            DeleteButton.Text = "Delete";
+            DeleteButton.UseVisualStyleBackColor = false;
+            DeleteButton.Click += DeleteButton_Click;
+            // 
+            // TipDelete
+            // 
+            TipDelete.ToolTipIcon = ToolTipIcon.Info;
+            TipDelete.ToolTipTitle = "Delete File";
+            // 
             // MainForm
             // 
             AllowDrop = true;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 476);
+            Controls.Add(DeleteButton);
             Controls.Add(VolumeBar);
             Controls.Add(OpenButton);
             Controls.Add(SkipButton);
@@ -313,5 +334,7 @@
         private ToolTip TipOpen;
         private TrackBar VolumeBar;
         private ToolTip TipVolumne;
+        private Button DeleteButton;
+        private ToolTip TipDelete;
     }
 }

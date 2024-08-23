@@ -72,6 +72,7 @@ namespace Bulk_File_Editor
             TipSkip.SetToolTip(SkipButton, "Skips the current file without doing any changes to it. It will come up in the next listing");
             TipOpen.SetToolTip(OpenButton, "Open another Folder, will reload the media list, might take some time");
             TipVolumne.SetToolTip(VolumeBar, "Set the volume the video is playing");
+            TipDelete.SetToolTip(DeleteButton, "Delete the file that is currently being displayed an proceed to the next one");
 
             DiscordCreateParams @params = default;
             Methods.DiscordCreateParamsSetDefault(&@params);
@@ -141,7 +142,7 @@ namespace Bulk_File_Editor
                 /*
                  * Setting the Discord Activity
                  */
-                setActivity($"Progress: {progress}/{progressGoal}"); 
+                setActivity($"Progress: {progress}/{progressGoal}");
 
                 /*
                  * Creating the Imagebox for displaying images if it doesnt already exist
@@ -248,8 +249,9 @@ namespace Bulk_File_Editor
             try
             {
                 FileInfo fileInfo = new FileInfo(mediaPath);
-
                 string newPath;
+
+                // GIF files dont support comments
                 if (fileInfo.Extension == ".gif")
                 {
                     newPath = mediaFolder + "\\" + NameField.Text + "-RENAMED.gif";
@@ -332,24 +334,23 @@ namespace Bulk_File_Editor
                     FileInfo fileInfo = new FileInfo(f);
                     ShellFile file = ShellFile.FromFilePath(f);
 
-                    if (file.Properties.System.Comment.Value != "" && file.Properties.System.Comment.Value != null) continue;
+                    if (file.Properties.System.Comment.Value != "" || file.Properties.System.Title.Value != "" || fileInfo.Name.Contains("-RENAMED.")) 
+                        continue;
 
                     file.Dispose();
 
                     if (RadioV.Checked && vidExt.Contains(fileInfo.Extension))
                     {
                         mediaFiles.Add(f);
-                        Console.WriteLine("Added vid\n" + "File number " + i + " checked " + f);
+                        Console.WriteLine("Added vid\n" + "File number " + i + " checked: " + f);
                     }
-                    else if (RadioI.Checked && imgExt.Contains(fileInfo.Extension) && !fileInfo.Name.Contains("-RENAMED."))
+                    else if (RadioI.Checked && imgExt.Contains(fileInfo.Extension))
                     {
                         mediaFiles.Add(f);
-                        Console.WriteLine("Added img\n" + "File number " + i + " checked " + f);
+                        Console.WriteLine("Added img\n" + "File number " + i + " checked: " + f);
                     }
 
-                    LoadDisplay.Value = i;
-
-                    i++;
+                    LoadDisplay.Value = i++;
                 }
 
                 LoadDisplay.Value = 0;
@@ -440,6 +441,48 @@ namespace Bulk_File_Editor
             if (!mediaPlayerOpen) return;
 
             mediaPlayer.VlcMediaPlayer.Audio.Volume = VolumeBar.Value * 2;
+        }
+
+        private void DeleteButton_Click(object sender, EventArgs e)
+        {
+            if (mediaFiles is null)
+            {
+                MessageBox.Show(
+                    text: "There is no file loaded right now!",
+                    caption: "Action cant be performed",
+                    buttons: MessageBoxButtons.OK,
+                    icon: MessageBoxIcon.Error);
+                return;
+            }
+            else if (mediaFiles.Count < 1)
+            {
+                MessageBox.Show(
+                    text: "There is no file loaded right now!",
+                    caption: "Action cant be performed",
+                    buttons: MessageBoxButtons.OK,
+                    icon: MessageBoxIcon.Error);
+                return;
+            }
+
+            DialogResult res = MessageBox.Show(
+                text: "Are you sure you want to delete " + this.mediaFiles[0].Split("\\").Last(),
+                caption: "Please confirm",
+                buttons: MessageBoxButtons.OKCancel,
+                icon: MessageBoxIcon.Stop,
+                defaultButton: MessageBoxDefaultButton.Button2,
+                options: MessageBoxOptions.ServiceNotification,
+                displayHelpButton: false);
+
+            if(res == DialogResult.OK) 
+            {
+                File.Delete(mediaFiles[0]);
+
+                mediaFiles.RemoveAt(0);
+                CommentField.Text = "";
+                progress++;
+
+                loadMedia();
+            }
         }
     }
 }
