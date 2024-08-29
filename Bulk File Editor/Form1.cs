@@ -1,16 +1,11 @@
-using System.Diagnostics;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
-using Vlc.DotNet.Core;
-using Vlc.DotNet.Core.Interops.Signatures;
 using Vlc.DotNet.Forms;
 using Microsoft.WindowsAPICodePack.Shell;
 using Microsoft.WindowsAPICodePack.Shell.PropertySystem;
 using Snap.Discord.GameSDK.ABI;
 using System.Runtime.CompilerServices;
 using System.Text.Unicode;
-using Windows.ApplicationModel.UserActivities;
+
 
 namespace Bulk_File_Editor
 {
@@ -318,6 +313,8 @@ namespace Bulk_File_Editor
             DialogResult result = openFileDialog.ShowDialog();
             if (result == DialogResult.OK)
             {
+                Microsoft.WindowsAPICodePack.Taskbar.TaskbarManager.Instance.SetProgressState(Microsoft.WindowsAPICodePack.Taskbar.TaskbarProgressBarState.Normal, windowHandle: Handle);
+
                 MediaOpened = true;
                 mediaFolder = openFileDialog.SelectedPath;
                 mediaFiles = new List<string>();
@@ -329,33 +326,55 @@ namespace Bulk_File_Editor
                 LoadDisplay.Minimum = 0;
                 LoadDisplay.Value = 0;
                 int i = 1;
+                FileInfo fileInfo;
+                ShellFile file;
+                bool justSkipped = false;
                 foreach (string f in Directory.GetFiles(openFileDialog.SelectedPath))
                 {
-                    FileInfo fileInfo = new FileInfo(f);
-                    ShellFile file = ShellFile.FromFilePath(f);
+                    fileInfo = new FileInfo(f);
 
-                    if (file.Properties.System.Comment.Value != "" || file.Properties.System.Title.Value != "" || fileInfo.Name.Contains("-RENAMED.")) 
+                    if((RadioV.Checked && !vidExt.Contains(fileInfo.Extension)) || 
+                        (RadioI.Checked && !imgExt.Contains(fileInfo.Extension)))
+                    {
+                        skipFile(ref LoadDisplay, ref justSkipped, ref i);
                         continue;
+                    }
 
-                    file.Dispose();
+                    using (file = ShellFile.FromFilePath(f))
+                    {
+                        try
+                        {
+                            if ((file.Properties.System.Comment.Value is not null) || file.Properties.System.Title.Value is not null || fileInfo.Name.Contains("-RENAMED."))
+                            {
+                                skipFile(ref LoadDisplay, ref justSkipped, ref i);
+                                continue;
+                            }
+                        }
+                        catch { }
+                    }
 
                     if (RadioV.Checked && vidExt.Contains(fileInfo.Extension))
                     {
                         mediaFiles.Add(f);
-                        Console.WriteLine("Added vid\n" + "File number " + i + " checked: " + f);
+                        Console.WriteLine("Added vid! File " + i + " path: " + f);
                     }
                     else if (RadioI.Checked && imgExt.Contains(fileInfo.Extension))
                     {
                         mediaFiles.Add(f);
-                        Console.WriteLine("Added img\n" + "File number " + i + " checked: " + f);
+                        Console.WriteLine("Added img! File " + i + " path: " + f);
                     }
+                    else Console.WriteLine("Fallback");
 
                     LoadDisplay.Value = i++;
+                    Microsoft.WindowsAPICodePack.Taskbar.TaskbarManager.Instance.SetProgressValue(i - 1, LoadDisplay.Maximum);
+                    if (justSkipped) justSkipped = false;
                 }
 
                 LoadDisplay.Value = 0;
 
                 progressGoal = mediaFiles.Count();
+
+                Microsoft.WindowsAPICodePack.Taskbar.TaskbarManager.Instance.SetProgressValue(0, 0);
 
                 /*
                  * 
@@ -484,6 +503,22 @@ namespace Bulk_File_Editor
                 loadMedia();
             }
         }
+
+        public void skipFile(ref ProgressBar load, ref bool skipped, ref int i)
+        {
+            if (skipped)
+                Console.CursorTop -= 2;
+            ClearCurrentConsoleLine();
+            Console.WriteLine("File " + i + " skipped!");
+            load.Value = i++;
+            skipped = true;
+            Microsoft.WindowsAPICodePack.Taskbar.TaskbarManager.Instance.SetProgressValue(i - 1, load.Maximum);
+        }
+        public static void ClearCurrentConsoleLine()
+        {
+            Console.Write("\r" + new string(' ', Console.BufferWidth) + "\r");
+        }
+
     }
 }
 
