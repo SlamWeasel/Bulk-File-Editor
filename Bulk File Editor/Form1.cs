@@ -266,11 +266,26 @@ namespace Bulk_File_Editor
                         Console.BackgroundColor = ConsoleColor.DarkRed;
                         Console.Write("\n" + ex + "\n");
                         Console.BackgroundColor = ConsoleColor.DarkGreen;
-                        Console.Write("Ignoring Comment and adding '-RENAMED'");
+                        Console.Write("Trying to set Title instead!");
                         Console.ResetColor();
-                        Console.Write(" \n");
-                        newPath = mediaFolder + "\\" + NameField.Text + "-RENAMED" + fileInfo.Extension;
-                        File.Move(mediaPath, newPath, false);
+                        try
+                        {
+                            file.Properties.System.Title.Value = CommentField.Text;
+                            newPath = mediaFolder + "\\" + NameField.Text + fileInfo.Extension;
+                            File.Move(mediaPath, newPath, false);
+                        }
+                        catch (PropertySystemException exIn)
+                        {
+                            Console.ForegroundColor = ConsoleColor.White;
+                            Console.BackgroundColor = ConsoleColor.DarkRed;
+                            Console.Write("\n" + exIn + "\n");
+                            Console.BackgroundColor = ConsoleColor.DarkGreen;
+                            Console.Write("Ignoring Comment and Title and adding '-RENAMED'");
+                            Console.ResetColor();
+                            Console.Write(" \n");
+                            newPath = mediaFolder + "\\" + NameField.Text + "-RENAMED" + fileInfo.Extension;
+                            File.Move(mediaPath, newPath, false);
+                        }
                     }
                 }
             }
