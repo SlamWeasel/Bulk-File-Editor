@@ -178,8 +178,11 @@ namespace Bulk_File_Editor
 
 
                     if (pictureBox != null)
+                    {
                         pictureBox.Dispose();
+                    }
 
+                    // Create new Media Player if its been disposed
                     if (mediaPlayer == null || mediaPlayer.IsDisposed)
                     {
                         mediaPlayer = new VlcControl();
@@ -199,7 +202,10 @@ namespace Bulk_File_Editor
                         };
                         mediaPlayer.VlcMediaPlayer.EncounteredError += (sender, e) =>
                         {
-                            throw new Exception("Shit");
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.Error.WriteLine(e);
+                            Console.ResetColor();
+                            //throw new Exception("Shit");
                         };
                     }
 
@@ -225,9 +231,10 @@ namespace Bulk_File_Editor
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void button1_Click(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e) { button1_Click(sender, e, false); }
+        private void button1_Click(object sender, EventArgs e, bool skip)
         {
-            if (NameField.Text == "" || CommentField.Text == "")
+            if ((NameField.Text == "" || CommentField.Text == "") && !skip)
                 return;
 
             if (mediaFiles.Count == 0)
@@ -243,6 +250,9 @@ namespace Bulk_File_Editor
 
             try
             {
+                if(skip) goto Contin;
+
+
                 FileInfo fileInfo = new FileInfo(mediaPath);
                 string newPath;
 
@@ -302,7 +312,7 @@ namespace Bulk_File_Editor
                 file.Dispose();
             }
 
-            mediaFiles.RemoveAt(0);
+            Contin: mediaFiles.RemoveAt(0);
 
             CommentField.Text = "";
 
@@ -445,13 +455,7 @@ namespace Bulk_File_Editor
         /// <param name="e"></param>
         private void SkipButton_Click(object sender, EventArgs e)
         {
-            mediaFiles.RemoveAt(0);
-
-            CommentField.Text = "";
-
-            progress++;
-
-            loadMedia();
+            button1_Click(sender, e, true);
         }
 
         /// <summary>
@@ -488,7 +492,7 @@ namespace Bulk_File_Editor
                     icon: MessageBoxIcon.Error);
                 return;
             }
-            else if (mediaFiles.Count < 1)
+            if (mediaFiles.Count < 1)
             {
                 MessageBox.Show(
                     text: "There is no file loaded right now!",
@@ -498,8 +502,10 @@ namespace Bulk_File_Editor
                 return;
             }
 
+            string delDir = this.mediaFiles[0];
+
             DialogResult res = MessageBox.Show(
-                text: "Are you sure you want to delete " + this.mediaFiles[0].Split("\\").Last(),
+                text: "Are you sure you want to delete " + delDir.Split("\\").Last(),
                 caption: "Please confirm",
                 buttons: MessageBoxButtons.OKCancel,
                 icon: MessageBoxIcon.Stop,
@@ -509,13 +515,9 @@ namespace Bulk_File_Editor
 
             if(res == DialogResult.OK) 
             {
-                File.Delete(mediaFiles[0]);
+                SkipButton_Click(sender, e);
 
-                mediaFiles.RemoveAt(0);
-                CommentField.Text = "";
-                progress++;
-
-                loadMedia();
+                File.Delete(delDir);
             }
         }
 
